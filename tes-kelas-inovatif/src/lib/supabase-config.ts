@@ -5,5 +5,8 @@ export const supabaseConfig = {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
+    flowType: "pkce",
+    autoConfirmUser: true,
+    skipEmailVerification: true,
   },
 };
