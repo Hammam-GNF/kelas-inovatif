@@ -12,7 +12,6 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
 
   const message = searchParams.get("message");
 
@@ -94,25 +93,6 @@ export default function SignIn() {
                   className="block w-full rounded-md border border-gray-300 focus:border-purple-700 focus:outline-none focus:ring-1 focus:ring-purple-700 py-1 px-1.5 text-gray-500"
                   required
                 />
-              </div>
-
-              <div className="mb-3 flex flex-wrap content-center">
-                <input
-                  id="remember"
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="mr-1 checked:bg-purple-700"
-                />
-                <label
-                  htmlFor="remember"
-                  className="mr-auto text-xs font-semibold"
-                >
-                  Remember for 30 days
-                </label>
-                <a href="#" className="text-xs font-semibold text-purple-700">
-                  Forgot password?
-                </a>
               </div>
 
               <div className="mb-3">
