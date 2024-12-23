@@ -4,16 +4,17 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import toast from "react-hot-toast";
+import type { Database } from "@/types/supabase";
 
-type UserRole = "admin" | "user";
+type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+type ProfileInsert = Database["public"]["Tables"]["profiles"]["Insert"];
+type UserRole = Database["public"]["Enums"]["user_role"];
 
 interface SignUpFormData {
   full_name: string;
   email: string;
   password: string;
   confirmPassword: string;
-  avatar_url?: string;
-  role: UserRole;
 }
 
 export default function SignUp() {
@@ -23,7 +24,6 @@ export default function SignUp() {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "user",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -76,43 +76,58 @@ export default function SignUp() {
         options: {
           data: {
             full_name: formData.full_name,
-            role: formData.role,
           },
         },
       });
 
-      if (authError) throw authError;
-
-      if (authData.user) {
-        // 2. Insert data to profiles table with timestamp
-        const now = new Date().toISOString();
-        const { error: profileError } = await supabase.from("profiles").insert([
-          {
-            id: authData.user.id,
-            full_name: formData.full_name,
-            email: formData.email,
-            role: formData.role,
-            avatar_url: formData.avatar_url,
-            created_at: now,
-            updated_at: now,
-          },
-        ]);
-
-        if (profileError) {
-          // If profile creation fails, delete auth user
-          await supabase.auth.admin.deleteUser(authData.user.id);
-          throw profileError;
-        }
-
-        toast.success("Account created successfully! You can now sign in.");
-        router.push(
-          "/auth/signin?message=Account created successfully! Please sign in."
-        );
+      if (authError) {
+        setError(authError.message);
+        toast.error(authError.message);
+        return;
       }
+
+      if (!authData.user) {
+        setError("Failed to create user account");
+        toast.error("Failed to create user account");
+        return;
+      }
+
+      // 2. Insert data to profiles table with timestamp
+      const now = new Date().toISOString();
+      const newProfile: ProfileInsert = {
+        id: authData.user.id,
+        full_name: formData.full_name,
+        email: formData.email,
+        role: "user",
+        avatar_url: null,
+        created_at: now,
+        updated_at: now,
+      };
+
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .insert(newProfile);
+
+      if (profileError) {
+        // If profile creation fails, delete auth user
+        await supabase.auth.admin.deleteUser(authData.user.id);
+        setError(profileError.message);
+        toast.error(profileError.message);
+        return;
+      }
+
+      toast.success("Account created successfully! You can now sign in.");
+      router.push(
+        "/auth/signin?message=Account created successfully! Please sign in."
+      );
     } catch (error: any) {
-      console.error("Error signing up:", error);
-      setError(error.message || "An error occurred during sign up");
-      toast.error(error.message || "Sign up failed");
+      const errorMessage =
+        error.message ||
+        error.error_description ||
+        "An error occurred during sign up";
+      console.error("Error signing up:", errorMessage);
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -179,6 +194,7 @@ export default function SignUp() {
               onChange={handleChange}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+              minLength={6}
             />
           </div>
           <button
