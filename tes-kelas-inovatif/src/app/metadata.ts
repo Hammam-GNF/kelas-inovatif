@@ -30,4 +30,4 @@ const defaultMetadata: Metadata = {
   },
 };
 
-export default defaultMetadata; 
+export default defaultMetadata;

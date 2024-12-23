@@ -9,4 +9,4 @@ export default function robots(): MetadataRoute.Robots {
     },
     sitemap: "http://localhost:3000/sitemap.xml",
   };
-} 
+}

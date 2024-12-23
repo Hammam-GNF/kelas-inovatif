@@ -10,4 +10,4 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Dashboard - Gonjil St",
   },
-}; 
+};

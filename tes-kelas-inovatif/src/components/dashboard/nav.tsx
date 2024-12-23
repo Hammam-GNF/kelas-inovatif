@@ -31,13 +31,32 @@ export default function DashboardNav({ user }: { user: User }) {
                 href="/dashboard"
                 className={`${
                   pathname === "/dashboard"
-                    ? "border-blue-500 text-gray-900"
+                    ? "border-indigo-500 text-gray-900"
                     : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
                 } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 Overview
               </Link>
-              {/* Add more navigation items as needed */}
+              <Link
+                href="/dashboard/profile"
+                className={`${
+                  pathname === "/dashboard/profile"
+                    ? "border-indigo-500 text-gray-900"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+              >
+                Profile
+              </Link>
+              <Link
+                href="/dashboard/settings"
+                className={`${
+                  pathname === "/dashboard/settings"
+                    ? "border-indigo-500 text-gray-900"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+              >
+                Settings
+              </Link>
             </div>
           </div>
           <div className="flex items-center">
