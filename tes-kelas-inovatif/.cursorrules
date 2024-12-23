@@ -1,0 +1,74 @@
+peraturan khusus :
+- gunakan bahasa indonesia
+- jika ragu, kamu bisa bertanya kepada saya
+- kamu adalah seorang developer yang berpengalaman
+- jika ada yang tidak jelas, kamu bisa bertanya kepada saya
+- jika ada yang tidak bisa, kamu bisa bertanya kepada saya
+- jika ada yang tidak sesuai, kamu bisa bertanya kepada saya
+- jika ada yang tidak diinginkan, kamu bisa bertanya kepada saya
+
+Project Overview:
+Membuat aplikasi web full-stack yang memungkinkan pengguna untuk mendaftar, masuk, dan mengelola konten blog pribadi. Aplikasi ini akan dibangun menggunakan NextJS sebagai framework utama, TailwindCSS dan Shadcn/UI untuk antarmuka pengguna, Supabase untuk database dan autentikasi, serta Resend untuk fungsionalitas email. Fokus utama adalah mengimplementasikan sistem autentikasi yang aman dan fitur blog yang intuitif dengan teknologi modern yang telah ditentukan.
+
+Technical Requirements:
+
+A. Framework & Development Stack
+- NextJS (Framework Full-stack) - Modern React Framework
+https://nextjs.org/docs/app/building-your-application/routing
+
+B. User Interface & Design
+- TailwindCSS - Utility-first CSS Framework
+- Shadcn/UI - Modern Component Library
+https://ui.shadcn.com/docs/components/accordion
+
+C. Backend Infrastructure 
+- PostgreSQL via Supabase - Database Management
+https://supabase.com/docs/reference/javascript
+- Supabase Auth - Authentication System
+https://supabase.com/docs/guides/auth/passwords
+
+D. Communication Services
+- Resend - Email Service Provider
+https://resend.com/docs/send-with-nextjs
+
+E. Deployment Platform
+- Vercel - Cloud Hosting & Deployment
+https://vercel.com/docs/deployments/deploy-nextjs
+
+Spesifikasi Fitur dan Fungsionalitas Aplikasi:
+Autentikasi:
+1. Pendaftaran pengguna (localhost:3000/register)
+Deskripsi: Pengguna akan mengisi formulir pendaftaran dengan data pribadi termasuk nama lengkap, email valid, dan kata sandi yang aman minimal 8 karakter. Setelah pendaftaran berhasil, sistem akan mengirimkan email konfirmasi ke alamat yang terdaftar. Pengguna dapat langsung mengakses sistem setelah mengkonfirmasi email tersebut.
+
+2. Fungsi login (localhost:3000/login)
+Deskripsi: Sistem menyediakan form login yang mengharuskan pengguna memasukkan kombinasi email dan kata sandi yang telah terdaftar. Setelah validasi berhasil, pengguna akan mendapatkan token autentikasi yang memungkinkan akses ke fitur-fitur sistem. Pengguna akan diarahkan ke halaman dashboard setelah proses login selesai.
+
+3. Fungsi logout (localhost:3000/logout)
+Deskripsi: Pengguna memiliki opsi untuk keluar dari sistem melalui tombol logout yang tersedia di menu navigasi. Saat logout dilakukan, sistem akan menghapus token autentikasi dari browser pengguna. Setelah logout berhasil, pengguna akan diarahkan kembali ke halaman login untuk keamanan.
+
+4. Pemulihan kata sandi (lupa kata sandi) (localhost:3000/forgot-password)
+Deskripsi: Sistem menyediakan mekanisme pemulihan kata sandi melalui email yang terdaftar di database. Setelah permintaan reset password diterima, sistem akan mengirimkan email berisi link khusus yang berlaku selama 1 jam. Pengguna dapat membuat kata sandi baru melalui link tersebut dengan mengikuti panduan keamanan yang ditentukan.
+
+5. Kemampuan mengatur ulang kata sandi (localhost:3000/dashboard/reset-password)
+Deskripsi: Fitur ini memungkinkan pengguna untuk memperbarui kata sandi mereka secara proaktif melalui halaman pengaturan akun. Proses ini memerlukan verifikasi kata sandi lama dan pembuatan kata sandi baru yang memenuhi standar keamanan. Sistem akan memperbarui kredensial setelah semua validasi berhasil dilakukan.
+
+6. Melihat profil pengguna (localhost:3000/dashboard/profile)
+Deskripsi: Halaman profil menyajikan informasi lengkap tentang akun pengguna termasuk data pribadi dan riwayat aktivitas dalam sistem. Pengguna dapat mengelola informasi profil mereka termasuk foto dan preferensi notifikasi. Semua perubahan pada profil akan tercatat dan tersimpan secara real-time di database.
+
+Keamanan:
+7. Rute dashboard yang dilindungi (middleware.ts)
+Deskripsi: Sistem mengimplementasikan lapisan keamanan untuk memastikan hanya pengguna terautentikasi yang dapat mengakses area dashboard. Middleware khusus akan memverifikasi token dan status autentikasi setiap kali halaman dashboard diakses. Pengguna yang tidak terautentikasi akan secara otomatis diarahkan ke halaman login.
+
+Fungsi Blog:
+8. Membuat post baru (localhost:3000/dashboard/create-post)
+Deskripsi: Platform menyediakan antarmuka intuitif untuk membuat konten blog dengan editor rich text dan dukungan multimedia. Pengguna dapat menyusun konten dengan berbagai elemen termasuk gambar, formatting teks, dan tag kategori. Sistem mendukung penyimpanan draft dan preview sebelum publikasi final.
+
+9. Mengedit post yang ada (localhost:3000/dashboard/edit-post)
+Deskripsi: Pemilik konten dapat memodifikasi posting yang telah dipublikasikan dengan akses penuh ke semua elemen konten. Sistem menyimpan riwayat perubahan dan memungkinkan pembatalan modifikasi jika diperlukan. Proses editing mendukung penyimpanan otomatis untuk mencegah kehilangan perubahan.
+
+10. Menghapus post (localhost:3000/dashboard/delete-post)
+Deskripsi: Fitur penghapusan posting dilengkapi dengan sistem konfirmasi untuk mencegah penghapusan yang tidak disengaja. Pengguna memiliki opsi untuk mengarsipkan konten sebagai alternatif penghapusan permanen. Sistem akan membersihkan semua aset terkait termasuk gambar saat posting dihapus.
+
+11. Melihat post (localhost:3000/dashboard/posts-list)
+Deskripsi: Platform menyajikan antarmuka yang terorganisir untuk menjelajahi konten blog dengan fitur pencarian dan filter yang komprehensif. Pengguna dapat menyortir konten berdasarkan berbagai parameter dan melihat statistik interaksi. Sistem menerapkan pagination untuk mengoptimalkan performa dan pengalaman pengguna.
+

@@ -1,83 +1,119 @@
 "use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { toast } from "react-hot-toast";
+import { Button } from "@/components/ui/button";
 
-type User = {
-  name?: string | null;
-  email?: string | null;
-  image?: string | null;
-};
+interface DashboardNavProps {
+  user: {
+    id?: string;
+    email?: string | null;
+    name?: string | null;
+    image?: string | null;
+    role?: string;
+  };
+}
 
-export default function DashboardNav({ user }: { user: User }) {
-  const pathname = usePathname();
+export default function DashboardNav({ user }: DashboardNavProps) {
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+
+      // 1. Konfirmasi logout
+      if (!window.confirm("Apakah Anda yakin ingin keluar?")) {
+        setIsLoggingOut(false);
+        return;
+      }
+
+      // 2. Proses logout dari Supabase
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        console.error("Error saat logout:", error);
+        toast.error("Gagal keluar dari sistem. Silakan coba lagi.");
+        return;
+      }
+
+      // 3. Hapus token dari localStorage
+      localStorage.removeItem("supabase.auth.token");
+
+      // 4. Hapus data sesi lainnya jika ada
+      sessionStorage.clear();
+
+      // 5. Tampilkan pesan sukses
+      toast.success("Berhasil keluar dari sistem");
+
+      // 6. Redirect ke halaman login
+      setTimeout(() => {
+        router.push("/auth/signin");
+      }, 1000);
+    } catch (error) {
+      console.error("Error saat proses logout:", error);
+      toast.error("Terjadi kesalahan saat keluar dari sistem");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
-    <nav className="bg-white shadow">
+    <nav className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
+            {/* Logo */}
             <div className="flex-shrink-0 flex items-center">
               <Link
                 href="/dashboard"
-                className="text-xl font-bold text-gray-800"
+                className="text-xl font-bold text-blue-600"
               >
                 Dashboard
               </Link>
             </div>
+
+            {/* Menu Navigasi */}
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link
                 href="/dashboard"
-                className={`${
-                  pathname === "/dashboard"
-                    ? "border-indigo-500 text-gray-900"
-                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
               >
-                Overview
+                Beranda
+              </Link>
+              <Link
+                href="/dashboard/posts-list"
+                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+              >
+                Artikel Saya
+              </Link>
+              <Link
+                href="/dashboard/create-post"
+                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+              >
+                Tulis Artikel
               </Link>
               <Link
                 href="/dashboard/profile"
-                className={`${
-                  pathname === "/dashboard/profile"
-                    ? "border-indigo-500 text-gray-900"
-                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
               >
-                Profile
-              </Link>
-              <Link
-                href="/dashboard/settings"
-                className={`${
-                  pathname === "/dashboard/settings"
-                    ? "border-indigo-500 text-gray-900"
-                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
-              >
-                Settings
+                Profil
               </Link>
             </div>
           </div>
+
+          {/* Tombol Logout */}
           <div className="flex items-center">
-            <div className="flex items-center space-x-3">
-              {user.image && (
-                <Image
-                  src={user.image}
-                  alt={user.name || ""}
-                  width={32}
-                  height={32}
-                  className="rounded-full"
-                />
-              )}
-              <span className="text-gray-700">{user.name}</span>
-              <button
-                onClick={() => signOut()}
-                className="ml-3 bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                Sign out
-              </button>
-            </div>
+            <Button
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              {isLoggingOut ? "Sedang Keluar..." : "Keluar"}
+            </Button>
           </div>
         </div>
       </div>

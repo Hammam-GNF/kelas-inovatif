@@ -1,36 +1,23 @@
 "use client";
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession, signIn, signOut } from "next-auth/react";
-import {
-  Dialog,
-  DialogPanel,
-  Popover,
-  PopoverButton,
-  PopoverGroup,
-  PopoverPanel,
-} from "@headlessui/react";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useSession, signIn } from "next-auth/react";
+import { useAuth } from "@/providers/AuthProvider";
+import Image from "next/image";
 
 export default function Navbar() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const { data: session, status } = useSession();
+  const { signOut } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="bg-white border-b border-gray-200">
-      <nav className="mx-auto flex max-w-[1440px] items-center justify-between px-4 py-2">
-        {/* Logo */}
+    <header className="bg-white">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
         <div className="flex lg:flex-1">
           <Link href="/" className="-m-1.5 p-1.5">
-            <span className="sr-only">Your Company</span>
-            <img
-              alt=""
-              src="/logo.png" // Ganti dengan logo Anda
-              className="h-8 w-auto"
-            />
+            <span className="text-2xl font-bold">Logo</span>
           </Link>
         </div>
 
@@ -38,55 +25,61 @@ export default function Navbar() {
         <div className="flex lg:hidden">
           <button
             type="button"
-            onClick={() => setMobileMenuOpen(true)}
             className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <span className="sr-only">Open main menu</span>
-            <Bars3Icon aria-hidden="true" className="h-6 w-6" />
+            {mobileMenuOpen ? (
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            ) : (
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                />
+              </svg>
+            )}
           </button>
         </div>
 
         {/* Desktop navigation */}
         <div className="hidden lg:flex lg:gap-x-8">
           <Link
-            href="/pricing"
+            href="/dashboard"
             className={`text-sm font-semibold leading-6 ${
-              pathname === "/pricing"
+              pathname === "/dashboard"
                 ? "text-blue-600"
                 : "text-gray-900 hover:text-gray-600"
             }`}
           >
-            Pricing
+            Dashboard
           </Link>
-          <Link
-            href="/chat"
-            className={`text-sm font-semibold leading-6 ${
-              pathname === "/chat"
-                ? "text-blue-600"
-                : "text-gray-900 hover:text-gray-600"
-            }`}
-          >
-            Chat with PDF
-          </Link>
-          {status === "authenticated" && (
-            <Link
-              href="/dashboard"
-              className={`text-sm font-semibold leading-6 ${
-                pathname === "/dashboard"
-                  ? "text-blue-600"
-                  : "text-gray-900 hover:text-gray-600"
-              }`}
-            >
-              My Library
-            </Link>
-          )}
         </div>
 
         {/* Auth buttons */}
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4">
           {status === "authenticated" ? (
             <div className="flex items-center gap-x-4">
-              {session.user?.image && (
+              {session?.user?.image && (
                 <Image
                   src={session.user.image}
                   alt={session.user.name || ""}
@@ -95,6 +88,9 @@ export default function Navbar() {
                   className="rounded-full"
                 />
               )}
+              <span className="text-sm font-semibold text-gray-900">
+                {session.user?.name}
+              </span>
               <button
                 onClick={() => signOut()}
                 className="text-sm font-semibold text-gray-900 hover:text-gray-600"
@@ -122,96 +118,65 @@ export default function Navbar() {
       </nav>
 
       {/* Mobile menu */}
-      <Dialog
-        open={mobileMenuOpen}
-        onClose={setMobileMenuOpen}
-        className="lg:hidden"
-      >
-        <div className="fixed inset-0 z-10" />
-        <DialogPanel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="-m-1.5 p-1.5">
-              <span className="sr-only">Your Company</span>
-              <img alt="" src="/logo.png" className="h-8 w-auto" />
-            </Link>
-            <button
-              type="button"
+      {mobileMenuOpen && (
+        <div className="lg:hidden">
+          <div className="space-y-1 px-4 pb-3 pt-2">
+            <Link
+              href="/dashboard"
+              className={`block rounded-md px-3 py-2 text-base font-medium ${
+                pathname === "/dashboard"
+                  ? "bg-blue-50 text-blue-600"
+                  : "text-gray-900 hover:bg-gray-50"
+              }`}
               onClick={() => setMobileMenuOpen(false)}
-              className="-m-2.5 rounded-md p-2.5 text-gray-700"
             >
-              <span className="sr-only">Close menu</span>
-              <XMarkIcon aria-hidden="true" className="h-6 w-6" />
-            </button>
+              Dashboard
+            </Link>
           </div>
-          <div className="mt-6 flow-root">
-            <div className="-my-6 divide-y divide-gray-500/10">
-              <div className="space-y-2 py-6">
-                <Link
-                  href="/pricing"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+          <div className="border-t border-gray-200 px-4 py-6">
+            {status === "authenticated" ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-x-3">
+                  {session?.user?.image && (
+                    <Image
+                      src={session.user.image}
+                      alt={session.user.name || ""}
+                      width={32}
+                      height={32}
+                      className="rounded-full"
+                    />
+                  )}
+                  <span className="text-sm font-semibold text-gray-900">
+                    {session.user?.name}
+                  </span>
+                </div>
+                <button
+                  onClick={() => signOut()}
+                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                 >
-                  Pricing
-                </Link>
-                <Link
-                  href="/chat"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <button
+                  onClick={() => signIn()}
+                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                 >
-                  Chat with PDF
+                  Sign in
+                </button>
+                <Link
+                  href="/auth/signup"
+                  className="-mx-3 block rounded-lg bg-blue-600 px-3 py-2.5 text-base font-semibold leading-7 text-white hover:bg-blue-500"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Sign up
                 </Link>
-                {status === "authenticated" && (
-                  <Link
-                    href="/dashboard"
-                    className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                  >
-                    My Library
-                  </Link>
-                )}
               </div>
-              <div className="py-6">
-                {status === "authenticated" ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-x-3">
-                      {session.user?.image && (
-                        <Image
-                          src={session.user.image}
-                          alt={session.user.name || ""}
-                          width={32}
-                          height={32}
-                          className="rounded-full"
-                        />
-                      )}
-                      <span className="text-sm font-semibold text-gray-900">
-                        {session.user?.name}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => signOut()}
-                      className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                    >
-                      Sign out
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <button
-                      onClick={() => signIn()}
-                      className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                    >
-                      Sign in
-                    </button>
-                    <Link
-                      href="/auth/signup"
-                      className="-mx-3 block rounded-lg bg-blue-600 px-3 py-2.5 text-base font-semibold leading-7 text-white hover:bg-blue-500"
-                    >
-                      Sign up
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </div>
+            )}
           </div>
-        </DialogPanel>
-      </Dialog>
+        </div>
+      )}
     </header>
   );
 }

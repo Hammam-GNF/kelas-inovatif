@@ -1,12 +1,33 @@
+"use client";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import AuthLoading from "@/components/auth/auth-loading";
+import { Toaster } from "react-hot-toast";
+
 export default function AuthTemplate({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session) {
+        router.replace("/dashboard");
+      }
+    };
+    checkAuth();
+  }, [router]);
+
   return (
-    <div className="flex min-h-screen flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-100">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md"></div>
+    <>
+      <Toaster position="top-center" />
       {children}
-    </div>
+    </>
   );
 }
