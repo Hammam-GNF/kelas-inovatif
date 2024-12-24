@@ -31,9 +31,21 @@ export default function SignUp() {
     setIsLoading(true);
 
     try {
-      // Simulate sign-up action
-      // Replace with actual sign-up logic
-      toast.success("Account created successfully! You can now sign in.");
+      const response = await fetch("/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "An error occurred during sign up");
+      }
+
+      toast.success(data.message);
       router.push("/signin?message=Account created successfully! Please sign in.");
     } catch (error: unknown) {
       const errorMessage = (error as Error).message || "An error occurred during sign up";

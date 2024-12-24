@@ -16,7 +16,9 @@ export default function SignIn() {
 
   useEffect(() => {
     const checkAuthSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (session) router.push("/dashboard");
     };
     checkAuthSession();
@@ -28,7 +30,10 @@ export default function SignIn() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
       if (error) {
         setErrorMessage(error.message);
@@ -50,10 +55,15 @@ export default function SignIn() {
   return (
     <div className="flex flex-wrap min-h-screen w-full content-center justify-center bg-gray-100 py-10">
       <div className="flex shadow-md">
-        <div className="flex flex-wrap content-center justify-center rounded-l-md bg-white" style={{ width: "24rem", height: "32rem" }}>
+        <div
+          className="flex flex-wrap content-center justify-center rounded-l-md bg-white"
+          style={{ width: "24rem", height: "32rem" }}
+        >
           <div className="w-72">
             <h1 className="text-xl font-semibold">Selamat Datang Kembali</h1>
-            <small className="text-gray-400">Silakan masukkan detail akun Anda</small>
+            <small className="text-gray-400">
+              Silakan masukkan detail akun Anda
+            </small>
 
             {errorMessage && (
               <div className="mt-3 p-2 bg-red-50 border border-red-200 text-red-600 text-xs rounded">
@@ -63,7 +73,9 @@ export default function SignIn() {
 
             <form className="mt-4" onSubmit={handleSubmit}>
               <div className="mb-3">
-                <label className="mb-2 block text-xs font-semibold">Email</label>
+                <label className="mb-2 block text-xs font-semibold">
+                  Email
+                </label>
                 <input
                   type="email"
                   placeholder="Masukkan email Anda"
@@ -76,7 +88,9 @@ export default function SignIn() {
               </div>
 
               <div className="mb-3">
-                <label className="mb-2 block text-xs font-semibold">Kata Sandi</label>
+                <label className="mb-2 block text-xs font-semibold">
+                  Kata Sandi
+                </label>
                 <input
                   type="password"
                   placeholder="Masukkan kata sandi"
@@ -100,20 +114,33 @@ export default function SignIn() {
               </div>
 
               <div className="text-center mb-3">
-                <Link href="/forgot-password" className="text-xs text-blue-600 hover:underline">Lupa kata sandi?</Link>
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-blue-600 hover:underline"
+                >
+                  Lupa kata sandi?
+                </Link>
               </div>
             </form>
 
             <div className="text-center">
-              <span className="text-xs text-gray-400 font-semibold">Belum punya akun? </span>
-              <Link href="/signup" className="text-xs font-semibold text-blue-600 hover:underline">Daftar sekarang</Link>
+              <span className="text-xs text-gray-400 font-semibold">
+                Belum punya akun?{" "}
+              </span>
+              <Link
+                href="/signup"
+                className="text-xs font-semibold text-blue-600 hover:underline"
+              >
+                Daftar sekarang
+              </Link>
             </div>
           </div>
         </div>
 
-        <div className="hidden md:flex flex-wrap content-center justify-center rounded-r-md" style={{ width: "24rem", height: "32rem" }}>
-          
-        </div>
+        <div
+          className="hidden md:flex flex-wrap content-center justify-center rounded-r-md"
+          style={{ width: "24rem", height: "32rem" }}
+        ></div>
       </div>
     </div>
   );

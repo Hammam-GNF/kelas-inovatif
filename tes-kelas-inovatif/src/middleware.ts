@@ -67,5 +67,5 @@ export async function middleware(request: NextRequest) {
 
 // Konfigurasi matcher
 export const config = {
-  matcher: ["/dashboard/"],
+  matcher: ["/dashboard/:path*", "/signin", "/signup", "/forgot-password"],
 };

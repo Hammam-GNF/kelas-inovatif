@@ -42,7 +42,7 @@ export default function ForgotPassword() {
 
       // 5. Redirect ke halaman login setelah beberapa detik
       setTimeout(() => {
-        router.push("/auth/signin");
+        router.push("/signin");
       }, 5000);
     } catch (error) {
       console.error("Error saat proses:", error);
@@ -106,7 +106,7 @@ export default function ForgotPassword() {
 
                 <div className="text-center">
                   <Link
-                    href="/auth/signin"
+                    href="/signin"
                     className="text-xs text-blue-600 hover:underline"
                   >
                     Kembali ke halaman login
