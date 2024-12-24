@@ -1,16 +1,39 @@
-import { CoreMessage, streamText } from "ai";
-import { openai } from "@ai-sdk/openai";
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
+import { experimental_generateImage, Message, streamText, tool } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { z } from 'zod';
 
-export async function POST(req: Request) {
-  const { messages }: { messages: CoreMessage[] } = await req.json();
+export async function POST(request: Request) {
+  const { messages }: { messages: Message[] } = await request.json();
 
-  const result = streamText({
-    model: openai("gpt-4"),
-    system: "You are a helpful assistant.",
-    messages,
+  const formattedMessages = messages.map(m => {
+    if (m.role === 'assistant' && m.toolInvocations) {
+      m.toolInvocations.forEach(ti => {
+        if (ti.toolName === 'generateImage' && ti.state === 'result') {
+          ti.result.image = `redacted-for-length`;
+        }
+      });
+    }
+    return m;
   });
 
+  const result = streamText({
+    model: openai('gpt-4'),
+    messages: formattedMessages,
+    tools: {
+      generateImage: tool({
+        description: 'Generate an image',
+        parameters: z.object({
+          prompt: z.string().describe('The prompt to generate the image from'),
+        }),
+        execute: async ({ prompt }) => {
+          const { image } = await experimental_generateImage({
+            model: openai.image('dall-e-3'),
+            prompt,
+          });
+          return { image: image.base64, prompt };
+        },
+      }),
+    },
+  });
   return result.toDataStreamResponse();
 }

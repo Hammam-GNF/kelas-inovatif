@@ -1,44 +1,52 @@
 "use client";
 
-import { useChat } from "ai/react";
-import { Input } from "@/components/ui/input"; // Assuming you have a custom Input component
-import { Button } from "@/components/ui/button"; // Assuming you have a custom Button component
+import { useChat } from 'ai/react';
+import Image from 'next/image';
 
-export default function Page() {
-  const { messages, input, setInput, append } = useChat();
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(event.target.value);
-  };
-
-  const handleKeyDown = async (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter' && input.trim()) {
-      append({ content: input, role: 'user' });
-      setInput(''); // Clear input after sending
-    }
-  };
+export default function Chat() {
+  const { messages, input, handleInputChange, handleSubmit } = useChat();
 
   return (
-    <div className="flex flex-col p-4 space-y-4">
-      <div className="flex-1 overflow-y-auto">
-        {messages.map((message, index) => (
-          <div key={index} className={`p-2 rounded ${message.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>
-            {message.content}
+    <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
+      <div className="space-y-4">
+        {messages.map(m => (
+          <div key={m.id} className="whitespace-pre-wrap">
+            <div key={m.id}>
+              <div className="font-bold">{m.role}</div>
+              {m.toolInvocations ? (
+                m.toolInvocations.map(ti =>
+                  ti.toolName === 'generateImage' ? (
+                    ti.state === 'result' ? (
+                      <Image
+                        key={ti.toolCallId}
+                        src={`data:image/png;base64,${ti.result.image}`}
+                        alt={ti.result.prompt}
+                        height={400}
+                        width={400}
+                      />
+                    ) : (
+                      <div key={ti.toolCallId} className="animate-pulse">
+                        Generating image...
+                      </div>
+                    )
+                  ) : null,
+                )
+              ) : (
+                <p>{m.content}</p>
+              )}
+            </div>
           </div>
         ))}
       </div>
-      <div className="flex">
-        <Input
+
+      <form onSubmit={handleSubmit}>
+        <input
+          className="fixed bottom-0 w-full max-w-md p-2 mb-8 border border-gray-300 rounded shadow-xl"
           value={input}
+          placeholder="Say something..."
           onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          placeholder="Type your message..."
-          className="flex-1 mr-2"
         />
-        <Button onClick={() => { if (input.trim()) append({ content: input, role: 'user' }); setInput(''); }}>
-          Send
-        </Button>
-      </div>
+      </form>
     </div>
   );
 }
