@@ -3,18 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { User } from "@supabase/supabase-js";
 import { toast } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/lib/supabase";
 
 interface DashboardNavProps {
-  user: {
-    id?: string;
-    email?: string | null;
-    name?: string | null;
-    image?: string | null;
-    role?: string;
-  };
+  user: User;
 }
 
 export default function DashboardNav({ user }: DashboardNavProps) {

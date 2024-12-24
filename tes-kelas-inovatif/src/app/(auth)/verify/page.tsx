@@ -31,7 +31,7 @@ export default function VerifyEmail() {
           // Redirect to sign in page
           setTimeout(() => {
             router.push(
-              "/auth/signin?message=Email verified successfully! Please sign in."
+              "/signin?message=Email verified successfully! Please sign in."
             );
           }, 2000);
         }

@@ -30,7 +30,7 @@ export default function SignIn() {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -43,7 +43,7 @@ export default function SignIn() {
 
       toast.success("Login berhasil!");
       router.replace("/dashboard");
-    } catch (error: any) {
+    } catch {
       setError("Terjadi kesalahan yang tidak diketahui");
       toast.error("Terjadi kesalahan yang tidak diketahui");
     } finally {
@@ -127,7 +127,7 @@ export default function SignIn() {
                 Belum punya akun?{" "}
               </span>
               <Link
-                href="/signup"
+                href="./signup"
                 className="text-xs font-semibold text-blue-600 hover:underline"
               >
                 Daftar sekarang

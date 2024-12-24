@@ -1,6 +1,5 @@
-"use client";
 import { useAuth } from "@/providers/AuthProvider";
-import AuthLoading from "@/components/auth/auth-loading";
+import AuthLoading from "@/components/auth/auth-loading"; // Ensure this path is correct
 import Navbar from "@/app/navbar";
 
 interface LayoutProps {
@@ -11,11 +10,9 @@ interface LayoutProps {
 export default function Layout({ children, showNavbar = true }: LayoutProps) {
   const { loading } = useAuth();
 
-  if (loading) {
-    return <AuthLoading />;
-  }
-
-  return (
+  return loading ? (
+    <AuthLoading />
+  ) : (
     <div className="min-h-screen bg-gray-50">
       {showNavbar && <Navbar />}
       <main>{children}</main>

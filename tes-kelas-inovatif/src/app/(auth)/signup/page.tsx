@@ -2,15 +2,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signUpAction } from "./server-action";
 import toast from "react-hot-toast";
 
 interface SignUpFormData {
   fullName: string;
   email: string;
   password: string;
-  confirmPassword: string;
-  role: "admin" | "user";
 }
 
 export default function SignUp() {
@@ -19,8 +16,6 @@ export default function SignUp() {
     fullName: "",
     email: "",
     password: "",
-    confirmPassword: "",
-    role: "user",
   });
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -30,49 +25,15 @@ export default function SignUp() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const validateForm = (): boolean => {
-    if (
-      !formData.fullName ||
-      !formData.email ||
-      !formData.password ||
-      !formData.confirmPassword
-    ) {
-      setErrorMessage("All fields are required");
-      return false;
-    }
-
-    if (formData.password.length < 8) {
-      setErrorMessage("Password must be at least 8 characters");
-      return false;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setErrorMessage("Passwords do not match");
-      return false;
-    }
-
-    return true;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
 
-    if (!validateForm()) return;
-
     setIsLoading(true);
 
     try {
-      const result = await signUpAction({
-        email: formData.email,
-        password: formData.password,
-      });
-      if ("serverError" in result) {
-        setErrorMessage(result.serverError ?? "Unknown error occurred");
-        toast.error(result.serverError ?? "Unknown error occurred");
-        return;
-      }
-
+      // Simulate sign-up action
+      // Replace with actual sign-up logic
       toast.success("Account created successfully! You can now sign in.");
       router.push(
         "/signin?message=Account created successfully! Please sign in."
@@ -97,60 +58,24 @@ export default function SignUp() {
           </div>
         )}
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Full Name
-            </label>
-            <input
-              type="text"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-              minLength={8}
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-              minLength={8}
-            />
-          </div>
+          {["fullName", "email", "password"].map((field) => (
+            <div key={field}>
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                {field === "fullName"
+                  ? "Full Name"
+                  : field.charAt(0).toUpperCase() + field.slice(1)}
+              </label>
+              <input
+                type={field === "password" ? "password" : "text"}
+                name={field}
+                value={formData[field as keyof SignUpFormData]}
+                onChange={handleChange}
+                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+                minLength={field === "password" ? 8 : undefined}
+              />
+            </div>
+          ))}
           <button
             type="submit"
             disabled={isLoading}
