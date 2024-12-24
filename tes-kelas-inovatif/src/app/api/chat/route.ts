@@ -1,5 +1,6 @@
 import { CoreMessage, streamText } from "ai";
 import { openai } from "@ai-sdk/openai";
+import { Ratelimit } from "@upstash/ratelimit";
 
 export async function POST(req: Request) {
   const { messages }: { messages: CoreMessage[] } = await req.json();
