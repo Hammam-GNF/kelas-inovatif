@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { signInAction } from "@/app/auth/signin/server-action";
+import { signInAction } from "../../../auth/signin/server-action";
 
 export default async function handler(
   req: NextApiRequest,

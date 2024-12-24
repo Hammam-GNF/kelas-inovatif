@@ -4,57 +4,50 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signUpAction } from "./server-action";
 import toast from "react-hot-toast";
-import type { Database } from "@/types/supabase";
-
-type ProfileInsert = Database["public"]["Tables"]["profiles"]["Insert"];
-type UserRole = Database["public"]["Enums"]["user_role"];
 
 interface SignUpFormData {
-  full_name: string;
+  fullName: string;
   email: string;
   password: string;
   confirmPassword: string;
-  role: UserRole;
+  role: "admin" | "user";
 }
 
 export default function SignUp() {
   const router = useRouter();
   const [formData, setFormData] = useState<SignUpFormData>({
-    full_name: "",
+    fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
     role: "user",
   });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const validateForm = () => {
+  const validateForm = (): boolean => {
     if (
-      !formData.full_name ||
+      !formData.fullName ||
       !formData.email ||
       !formData.password ||
       !formData.confirmPassword
     ) {
-      setError("All fields are required");
+      setErrorMessage("All fields are required");
       return false;
     }
 
     if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters");
+      setErrorMessage("Password must be at least 8 characters");
       return false;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      setErrorMessage("Passwords do not match");
       return false;
     }
 
@@ -63,31 +56,34 @@ export default function SignUp() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setErrorMessage("");
 
     if (!validateForm()) return;
 
-    setLoading(true);
+    setIsLoading(true);
 
     try {
-      const result = await signUpAction(formData);
+      const result = await signUpAction({
+        email: formData.email,
+        password: formData.password,
+      });
       if ("serverError" in result) {
-        setError(result.serverError ?? "Unknown error occurred");
+        setErrorMessage(result.serverError ?? "Unknown error occurred");
         toast.error(result.serverError ?? "Unknown error occurred");
         return;
       }
 
       toast.success("Account created successfully! You can now sign in.");
       router.push(
-        "/auth/signin?message=Account created successfully! Please sign in."
+        "/signin?message=Account created successfully! Please sign in."
       );
     } catch (error: any) {
       const errorMessage = error.message || "An error occurred during sign up";
       console.error("Error signing up:", errorMessage);
-      setError(errorMessage);
+      setErrorMessage(errorMessage);
       toast.error(errorMessage);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -95,9 +91,9 @@ export default function SignUp() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
         <h2 className="text-2xl font-bold mb-6 text-center">Create Account</h2>
-        {error && (
+        {errorMessage && (
           <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
+            {errorMessage}
           </div>
         )}
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -107,8 +103,8 @@ export default function SignUp() {
             </label>
             <input
               type="text"
-              name="full_name"
-              value={formData.full_name}
+              name="fullName"
+              value={formData.fullName}
               onChange={handleChange}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
@@ -157,14 +153,14 @@ export default function SignUp() {
           </div>
           <button
             type="submit"
-            disabled={loading}
+            disabled={isLoading}
             className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Creating Account..." : "Sign Up"}
+            {isLoading ? "Creating Account..." : "Sign Up"}
           </button>
           <p className="text-center text-sm text-gray-600">
             Already have an account?{" "}
-            <Link href="/auth/signin" className="text-blue-500 hover:underline">
+            <Link href="/signin" className="text-blue-500 hover:underline">
               Sign In
             </Link>
           </p>

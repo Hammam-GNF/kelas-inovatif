@@ -1,27 +1,3 @@
-interface SupabaseUser {
-  id: string;
-  email?: string;
-  user_metadata?: {
-    full_name?: string;
-    avatar_url?: string;
-  };
-}
-
-interface SupabaseAuthResponse {
-  data: {
-    user: SupabaseUser | null;
-  };
-  error: Error | null;
-}
-
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
-
 export type Database = {
   public: {
     Tables: {
@@ -54,12 +30,6 @@ export type Database = {
           updated_at?: string;
         };
       };
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      [_ in never]: never;
     };
     Enums: {
       user_role: "admin" | "user";

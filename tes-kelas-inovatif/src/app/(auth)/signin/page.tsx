@@ -3,42 +3,37 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { toast } from "react-hot-toast";
-import { Toaster } from "react-hot-toast";
+import { toast, Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { signInAction } from "./server-action";
 import { supabase } from "@/lib/supabase";
 
 export default function SignIn() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const checkAuth = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      if (session) {
-        router.push("/dashboard");
-      }
+      if (session) router.push("/dashboard");
     };
     checkAuth();
   }, [router]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setError("");
-    setLoading(true);
+    setIsLoading(true);
 
     try {
       const result = await signInAction({ email, password });
 
-      if (!result) {
-        throw new Error("Gagal melakukan sign in");
-      }
+      if (!result) throw new Error("Gagal melakukan sign in");
 
       if ("serverError" in result && typeof result.serverError === "string") {
         setError(result.serverError);
@@ -48,12 +43,11 @@ export default function SignIn() {
 
       toast.success("Login berhasil!");
       router.replace("/dashboard");
-    } catch (error: any) {
-      console.error("Error login:", error);
+    } catch {
       setError("Terjadi kesalahan yang tidak diketahui");
       toast.error("Terjadi kesalahan yang tidak diketahui");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -90,7 +84,7 @@ export default function SignIn() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="block w-full rounded-md border border-gray-300 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 py-1.5 px-2 text-gray-600"
                     required
-                    disabled={loading}
+                    disabled={isLoading}
                   />
                 </div>
 
@@ -105,7 +99,7 @@ export default function SignIn() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="block w-full rounded-md border border-gray-300 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 py-1.5 px-2 text-gray-600"
                     required
-                    disabled={loading}
+                    disabled={isLoading}
                     minLength={8}
                   />
                 </div>
@@ -113,16 +107,16 @@ export default function SignIn() {
                 <div className="mb-3">
                   <Button
                     type="submit"
-                    disabled={loading}
+                    disabled={isLoading}
                     className="mb-1.5 block w-full text-center text-white bg-blue-600 hover:bg-blue-700 px-2 py-1.5 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? "Sedang Masuk..." : "Masuk"}
+                    {isLoading ? "Sedang Masuk..." : "Masuk"}
                   </Button>
                 </div>
 
                 <div className="text-center mb-3">
                   <Link
-                    href="/auth/forgot-password"
+                    href="/forgot-password"
                     className="text-xs text-blue-600 hover:underline"
                   >
                     Lupa kata sandi?
@@ -135,7 +129,7 @@ export default function SignIn() {
                   Belum punya akun?{" "}
                 </span>
                 <Link
-                  href="/auth/signup"
+                  href="/signup"
                   className="text-xs font-semibold text-blue-600 hover:underline"
                 >
                   Daftar sekarang

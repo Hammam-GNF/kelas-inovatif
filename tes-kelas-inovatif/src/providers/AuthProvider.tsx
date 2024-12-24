@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
-import { SessionProvider } from "next-auth/react";
+import { toast } from "react-hot-toast";
 
 interface AuthContextType {
   user: User | null;
@@ -17,7 +17,7 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
 });
 
-function AuthProviderContent({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -25,24 +25,35 @@ function AuthProviderContent({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check active sessions and sets the user
     const getSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      setLoading(false);
+      try {
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+        if (error) throw error;
+        setUser(session?.user ?? null);
+      } catch (error) {
+        console.error("Error checking auth session:", error);
+        toast.error("Terjadi kesalahan saat memeriksa sesi");
+      } finally {
+        setLoading(false);
+      }
     };
 
     getSession();
 
-    // Listen for changes on auth state (logged in, signed out, etc.)
+    // Listen for changes on auth state
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null);
-      setLoading(false);
 
-      if (event === "SIGNED_OUT") {
-        router.push("/auth/signin");
+      if (event === "SIGNED_IN") {
+        toast.success("Login berhasil!");
+        router.push("/dashboard");
+      } else if (event === "SIGNED_OUT") {
+        toast.success("Logout berhasil!");
+        router.push("/");
       }
     });
 
@@ -52,23 +63,22 @@ function AuthProviderContent({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/auth/signin");
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast.error("Terjadi kesalahan saat logout");
+    }
   };
 
-  return (
-    <AuthContext.Provider value={{ user, loading, signOut }}>
-      {!loading && children}
-    </AuthContext.Provider>
-  );
-}
+  const value = {
+    user,
+    loading,
+    signOut,
+  };
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  return (
-    <SessionProvider>
-      <AuthProviderContent>{children}</AuthProviderContent>
-    </SessionProvider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export const useAuth = () => {

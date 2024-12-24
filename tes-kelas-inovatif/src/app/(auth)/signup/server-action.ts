@@ -15,19 +15,13 @@ export async function signUpAction(data: { email: string; password: string }) {
   const { email, password } = validationResult.data;
 
   try {
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    const { data, error } = await supabase.auth.signUp({ email, password });
 
     if (error) {
       return { serverError: error.message };
     }
 
-    return { user };
+    return { user: data.user };
   } catch (error) {
     console.error("Sign-up error:", error);
     return { serverError: "Terjadi kesalahan saat proses pendaftaran." };

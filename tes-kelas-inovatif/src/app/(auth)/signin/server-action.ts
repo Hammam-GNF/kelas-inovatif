@@ -1,13 +1,14 @@
 import { returnValidationErrors } from "next-safe-action";
 import { actionClient } from "@/lib/safe-action";
 import { signInSchema } from "./validation";
+import { supabase } from "@/lib/supabase";
 
 export const signInAction = actionClient
 	.schema(signInSchema)
 	.action(async ({ parsedInput }) => {
 		const { email, password } = parsedInput;
 
-		const isCredentialsValid = email && password;
+		const isCredentialsValid = Boolean(email && password);
 
 		if (!isCredentialsValid) {
 			return returnValidationErrors(signInSchema, {
@@ -15,10 +16,19 @@ export const signInAction = actionClient
 			});
 		}
 
-		// Here you would typically handle the sign-in logic, e.g., checking against a database
+		const { data, error } = await supabase.auth.signInWithPassword({
+			email,
+			password,
+		});
+
+		if (error || !data.user) {
+			return returnValidationErrors(signInSchema, {
+				_errors: [error?.message || "Gagal melakukan sign in"],
+			});
+		}
 
 		return {
 			message: "Sign-in successful",
-			user: { email }, // Return user info as needed
+			user: { email: data.user.email }, // Return user info as needed
 		};
 	});

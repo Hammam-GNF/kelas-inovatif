@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { supabase } from "./supabase";
+import type { Account, Profile } from "next-auth";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -26,38 +27,41 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) return null;
 
         try {
-          const {
-            data: { user },
-            error,
-          } = await supabase.auth.signInWithPassword({
+          const { data, error } = await supabase.auth.signInWithPassword({
             email: credentials.email,
             password: credentials.password,
           });
 
-          if (error || !user) return null;
+          if (error || !data.user) return null;
 
           const { data: profile } = await supabase
             .from("profiles")
             .select("*")
-            .eq("id", user.id)
+            .eq("id", data.user.id)
             .single();
 
           return {
-            id: user.id,
-            email: user.email || "",
+            id: data.user.id,
+            email: data.user.email || "",
             name: profile?.full_name || "",
             image: profile?.avatar_url || null,
             role: profile?.role || "user",
           };
-        } catch (error) {
-          console.error("Auth error:", error);
+        } catch (authError) {
+          console.error("Auth error:", authError);
           return null;
         }
       },
     }),
   ],
   callbacks: {
-    async signIn({ account, profile }) {
+    async signIn({
+      account,
+      profile,
+    }: {
+      account: Account | null;
+      profile?: Profile;
+    }) {
       if (account?.provider === "google") {
         try {
           const { data: existingUser } = await supabase
@@ -67,33 +71,37 @@ export const authOptions: NextAuthOptions = {
             .single();
 
           if (!existingUser) {
-            await supabase.from("profiles").insert([
-              {
-                id: profile?.sub,
-                email: profile?.email,
-                full_name: profile?.name,
-                avatar_url: profile?.image,
-                role: "user",
-              },
-            ]);
+            await supabase.from("profiles").insert({
+              id: profile?.sub,
+              email: profile?.email,
+              full_name: profile?.name,
+              avatar_url: profile?.image,
+              role: "user",
+            });
           }
-        } catch (error) {
-          console.error("Error handling Google sign in:", error);
+        } catch (signInError) {
+          console.error("Error handling Google sign in:", signInError);
           return false;
         }
       }
       return true;
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user) {
-        token.role = user.role;
+        token.role = user.role || "user"; // Default to "user" if role is undefined
       }
       return token;
     },
     async session({ session, token }) {
       if (session?.user) {
-        session.user.id = token.sub!;
-        session.user.role = token.role as string;
+        return {
+          ...session,
+          user: {
+            ...session.user,
+            id: token.sub!,
+            role: (token.role as string) || "user",
+          },
+        };
       }
       return session;
     },
