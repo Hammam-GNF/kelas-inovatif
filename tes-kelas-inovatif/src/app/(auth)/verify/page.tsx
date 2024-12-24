@@ -1,63 +1,73 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { supabase } from "@/lib/supabase";
-import toast from "react-hot-toast";
 
-export default function VerifyEmail() {
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
+import { supabase } from "@/lib/supabase";
+
+function VerifyForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [error, setError] = useState<string | null>(null);
+  const [isVerifying, setIsVerifying] = useState(true);
 
   useEffect(() => {
     const verifyEmail = async () => {
       try {
-        // Get token from URL
-        const token = searchParams.get("token");
-        const type = searchParams.get("type");
+        const token = searchParams?.get("token");
 
-        if (type === "email_confirmation") {
-          // Verify the email
-          const { error } = await supabase.auth.verifyOtp({
-            token_hash: token!,
-            type: "email",
-          });
-
-          if (error) throw error;
-
-          // Show success message
-          toast.success("Email verified successfully! You can now sign in.");
-
-          // Redirect to sign in page
-          setTimeout(() => {
-            router.push(
-              "/signin?message=Email verified successfully! Please sign in."
-            );
-          }, 2000);
+        if (!token) {
+          toast.error("Token verifikasi tidak valid");
+          router.push("/signin");
+          return;
         }
-      } catch (error: any) {
-        console.error("Verification error:", error);
-        setError(error.message);
-        toast.error("Failed to verify email");
+
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: token,
+          type: "email",
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        toast.success("Email berhasil diverifikasi");
+        setTimeout(() => {
+          router.push("/signin");
+        }, 2000);
+      } catch (error) {
+        console.error("Error verifying email:", error);
+        toast.error("Gagal memverifikasi email");
+        router.push("/signin");
+      } finally {
+        setIsVerifying(false);
       }
     };
 
     verifyEmail();
-  }, [router, searchParams]);
+  }, [searchParams, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-96 text-center">
-        <h2 className="text-2xl font-bold mb-4">Email Verification</h2>
-        {error ? (
-          <div className="text-red-600 mb-4">{error}</div>
-        ) : (
-          <div className="flex flex-col items-center space-y-4">
-            <div className="w-12 h-12 border-4 border-t-blue-500 border-b-blue-500 rounded-full animate-spin"></div>
-            <p className="text-gray-600">Verifying your email...</p>
-          </div>
-        )}
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
+        <h1 className="mb-4 text-center text-2xl font-bold">
+          {isVerifying ? "Memverifikasi Email..." : "Verifikasi Email"}
+        </h1>
+        <p className="text-center text-gray-600">
+          {isVerifying
+            ? "Mohon tunggu sebentar..."
+            : "Email Anda telah berhasil diverifikasi"}
+        </p>
       </div>
     </div>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <VerifyForm />
+    </Suspense>
   );
 }

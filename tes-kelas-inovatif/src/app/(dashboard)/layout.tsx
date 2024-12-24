@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
-import DashboardNav from "@/components/dashboard/nav";
 
 export default async function DashboardLayout({
   children,
@@ -17,7 +16,6 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <DashboardNav user={session.user} />
       <main className="py-10">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">{children}</div>
       </main>

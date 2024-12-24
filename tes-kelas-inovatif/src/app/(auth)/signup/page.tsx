@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 interface SignUpFormData {
   fullName: string;
@@ -28,18 +28,15 @@ export default function SignUp() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
-
     setIsLoading(true);
 
     try {
       // Simulate sign-up action
       // Replace with actual sign-up logic
       toast.success("Account created successfully! You can now sign in.");
-      router.push(
-        "/signin?message=Account created successfully! Please sign in."
-      );
-    } catch (error: any) {
-      const errorMessage = error.message || "An error occurred during sign up";
+      router.push("/signin?message=Account created successfully! Please sign in.");
+    } catch (error: unknown) {
+      const errorMessage = (error as Error).message || "An error occurred during sign up";
       console.error("Error signing up:", errorMessage);
       setErrorMessage(errorMessage);
       toast.error(errorMessage);
@@ -61,9 +58,7 @@ export default function SignUp() {
           {["fullName", "email", "password"].map((field) => (
             <div key={field}>
               <label className="block text-gray-700 text-sm font-bold mb-2">
-                {field === "fullName"
-                  ? "Full Name"
-                  : field.charAt(0).toUpperCase() + field.slice(1)}
+                {field === "fullName" ? "Full Name" : field.charAt(0).toUpperCase() + field.slice(1)}
               </label>
               <input
                 type={field === "password" ? "password" : "text"}

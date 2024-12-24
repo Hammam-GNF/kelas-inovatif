@@ -11,32 +11,27 @@ export default function SignIn() {
   const router = useRouter();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [error, setError] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+    const checkAuthSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) router.push("/dashboard");
     };
-    checkAuth();
+    checkAuthSession();
   }, [router]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setError("");
+    setErrorMessage("");
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
-        setError(error.message);
+        setErrorMessage(error.message);
         toast.error(error.message);
         return;
       }
@@ -44,8 +39,9 @@ export default function SignIn() {
       toast.success("Login berhasil!");
       router.replace("/dashboard");
     } catch {
-      setError("Terjadi kesalahan yang tidak diketahui");
-      toast.error("Terjadi kesalahan yang tidak diketahui");
+      const unknownErrorMessage = "Terjadi kesalahan yang tidak diketahui";
+      setErrorMessage(unknownErrorMessage);
+      toast.error(unknownErrorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -54,27 +50,20 @@ export default function SignIn() {
   return (
     <div className="flex flex-wrap min-h-screen w-full content-center justify-center bg-gray-100 py-10">
       <div className="flex shadow-md">
-        <div
-          className="flex flex-wrap content-center justify-center rounded-l-md bg-white"
-          style={{ width: "24rem", height: "32rem" }}
-        >
+        <div className="flex flex-wrap content-center justify-center rounded-l-md bg-white" style={{ width: "24rem", height: "32rem" }}>
           <div className="w-72">
             <h1 className="text-xl font-semibold">Selamat Datang Kembali</h1>
-            <small className="text-gray-400">
-              Silakan masukkan detail akun Anda
-            </small>
+            <small className="text-gray-400">Silakan masukkan detail akun Anda</small>
 
-            {error && (
+            {errorMessage && (
               <div className="mt-3 p-2 bg-red-50 border border-red-200 text-red-600 text-xs rounded">
-                {error}
+                {errorMessage}
               </div>
             )}
 
             <form className="mt-4" onSubmit={handleSubmit}>
               <div className="mb-3">
-                <label className="mb-2 block text-xs font-semibold">
-                  Email
-                </label>
+                <label className="mb-2 block text-xs font-semibold">Email</label>
                 <input
                   type="email"
                   placeholder="Masukkan email Anda"
@@ -87,9 +76,7 @@ export default function SignIn() {
               </div>
 
               <div className="mb-3">
-                <label className="mb-2 block text-xs font-semibold">
-                  Kata Sandi
-                </label>
+                <label className="mb-2 block text-xs font-semibold">Kata Sandi</label>
                 <input
                   type="password"
                   placeholder="Masukkan kata sandi"
@@ -113,38 +100,19 @@ export default function SignIn() {
               </div>
 
               <div className="text-center mb-3">
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-blue-600 hover:underline"
-                >
-                  Lupa kata sandi?
-                </Link>
+                <Link href="/forgot-password" className="text-xs text-blue-600 hover:underline">Lupa kata sandi?</Link>
               </div>
             </form>
 
             <div className="text-center">
-              <span className="text-xs text-gray-400 font-semibold">
-                Belum punya akun?{" "}
-              </span>
-              <Link
-                href="./signup"
-                className="text-xs font-semibold text-blue-600 hover:underline"
-              >
-                Daftar sekarang
-              </Link>
+              <span className="text-xs text-gray-400 font-semibold">Belum punya akun? </span>
+              <Link href="/signup" className="text-xs font-semibold text-blue-600 hover:underline">Daftar sekarang</Link>
             </div>
           </div>
         </div>
 
-        <div
-          className="hidden md:flex flex-wrap content-center justify-center rounded-r-md"
-          style={{ width: "24rem", height: "32rem" }}
-        >
-          <img
-            className="w-full h-full bg-center bg-no-repeat bg-cover rounded-r-md"
-            src="https://i.imgur.com/9l1A4OS.jpeg"
-            alt="Banner login"
-          />
+        <div className="hidden md:flex flex-wrap content-center justify-center rounded-r-md" style={{ width: "24rem", height: "32rem" }}>
+          
         </div>
       </div>
     </div>

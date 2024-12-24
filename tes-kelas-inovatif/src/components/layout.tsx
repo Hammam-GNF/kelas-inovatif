@@ -1,5 +1,4 @@
 import { useAuth } from "@/providers/AuthProvider";
-import AuthLoading from "@/components/auth/auth-loading"; // Ensure this path is correct
 import Navbar from "@/app/navbar";
 
 interface LayoutProps {
@@ -11,7 +10,9 @@ export default function Layout({ children, showNavbar = true }: LayoutProps) {
   const { loading } = useAuth();
 
   return loading ? (
-    <AuthLoading />
+    <div className="flex justify-center items-center h-screen">
+      <p className="text-2xl font-bold">Loading...</p>
+    </div>
   ) : (
     <div className="min-h-screen bg-gray-50">
       {showNavbar && <Navbar />}
