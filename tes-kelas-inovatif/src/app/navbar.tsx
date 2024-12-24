@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession, signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useAuth } from "@/providers/AuthProvider";
 import Image from "next/image";
 
@@ -101,14 +101,12 @@ export default function Navbar() {
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-x-4">
-              <Link
-                href="/signin"
-                className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500"
-              >
-                Sign in
-              </Link>
-            </div>
+            <Link
+              href="/signin"
+              className="flex items-center gap-x-4 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500"
+            >
+              Sign in
+            </Link>
           )}
         </div>
       </nav>
@@ -154,14 +152,12 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <div className="space-y-3">
-                <button
-                  onClick={() => signIn()}
-                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                >
-                  Sign in
-                </button>
-              </div>
+              <button
+                onClick={() => signIn()}
+                className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+              >
+                Sign in
+              </button>
             )}
           </div>
         </div>
