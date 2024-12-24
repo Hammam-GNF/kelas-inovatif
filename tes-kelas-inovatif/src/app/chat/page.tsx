@@ -3,7 +3,6 @@
 import { useChat } from "ai/react";
 import { Input } from "@/components/ui/input"; // Assuming you have a custom Input component
 import { Button } from "@/components/ui/button"; // Assuming you have a custom Button component
-import { useEffect } from "react";
 
 export default function Page() {
   const { messages, input, setInput, append } = useChat();
