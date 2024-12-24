@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
     if (isProtectedRoute) {
       if (!session) {
         // Redirect ke login jika mencoba akses rute yang dilindungi tanpa login
-        const redirectUrl = new URL("/auth/signin", requestUrl.origin);
+        const redirectUrl = new URL("/signin", requestUrl.origin);
         return NextResponse.redirect(redirectUrl);
       }
       // Pengguna sudah login dan mengakses rute yang dilindungi
@@ -47,7 +47,7 @@ export async function middleware(request: NextRequest) {
     }
 
     // 8. Handle rute auth
-    if (path.startsWith("/auth")) {
+    if (path.startsWith("/signin")) {
       if (session) {
         // Jika sudah login dan mencoba akses halaman auth, redirect ke dashboard
         return NextResponse.redirect(new URL("/dashboard", requestUrl.origin));
@@ -61,11 +61,11 @@ export async function middleware(request: NextRequest) {
   } catch (error) {
     console.error("Middleware error:", error);
     // Redirect ke halaman error jika terjadi masalah
-    return NextResponse.redirect(new URL("/auth/error", request.url));
+    return NextResponse.redirect(new URL("/error", request.url));
   }
 }
 
 // Konfigurasi matcher
 export const config = {
-  matcher: ["/dashboard/:path*", "/auth/:path*"],
+  matcher: ["/dashboard/:path*"],
 };

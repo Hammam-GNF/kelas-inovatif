@@ -2,11 +2,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import { signUpAction } from "./server-action";
 import toast from "react-hot-toast";
 import type { Database } from "@/types/supabase";
 
-type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 type ProfileInsert = Database["public"]["Tables"]["profiles"]["Insert"];
 type UserRole = Database["public"]["Enums"]["user_role"];
 
@@ -15,6 +14,7 @@ interface SignUpFormData {
   email: string;
   password: string;
   confirmPassword: string;
+  role: UserRole;
 }
 
 export default function SignUp() {
@@ -24,6 +24,7 @@ export default function SignUp() {
     email: "",
     password: "",
     confirmPassword: "",
+    role: "user",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -47,8 +48,8 @@ export default function SignUp() {
       return false;
     }
 
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters");
+    if (formData.password.length < 8) {
+      setError("Password must be at least 8 characters");
       return false;
     }
 
@@ -69,50 +70,10 @@ export default function SignUp() {
     setLoading(true);
 
     try {
-      // 1. Sign up with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.full_name,
-          },
-        },
-      });
-
-      if (authError) {
-        setError(authError.message);
-        toast.error(authError.message);
-        return;
-      }
-
-      if (!authData.user) {
-        setError("Failed to create user account");
-        toast.error("Failed to create user account");
-        return;
-      }
-
-      // 2. Insert data to profiles table with timestamp
-      const now = new Date().toISOString();
-      const newProfile: ProfileInsert = {
-        id: authData.user.id,
-        full_name: formData.full_name,
-        email: formData.email,
-        role: "user",
-        avatar_url: null,
-        created_at: now,
-        updated_at: now,
-      };
-
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .insert(newProfile);
-
-      if (profileError) {
-        // If profile creation fails, delete auth user
-        await supabase.auth.admin.deleteUser(authData.user.id);
-        setError(profileError.message);
-        toast.error(profileError.message);
+      const result = await signUpAction(formData);
+      if ("serverError" in result) {
+        setError(result.serverError ?? "Unknown error occurred");
+        toast.error(result.serverError ?? "Unknown error occurred");
         return;
       }
 
@@ -121,10 +82,7 @@ export default function SignUp() {
         "/auth/signin?message=Account created successfully! Please sign in."
       );
     } catch (error: any) {
-      const errorMessage =
-        error.message ||
-        error.error_description ||
-        "An error occurred during sign up";
+      const errorMessage = error.message || "An error occurred during sign up";
       console.error("Error signing up:", errorMessage);
       setError(errorMessage);
       toast.error(errorMessage);
@@ -180,7 +138,7 @@ export default function SignUp() {
               onChange={handleChange}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
-              minLength={6}
+              minLength={8}
             />
           </div>
           <div>
@@ -194,7 +152,7 @@ export default function SignUp() {
               onChange={handleChange}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
-              minLength={6}
+              minLength={8}
             />
           </div>
           <button

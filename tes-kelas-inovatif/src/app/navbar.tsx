@@ -10,7 +10,9 @@ export default function Navbar() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const { signOut } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = () => setIsMobileMenuOpen((prev) => !prev);
 
   return (
     <header className="bg-white">
@@ -26,10 +28,10 @@ export default function Navbar() {
           <button
             type="button"
             className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={toggleMobileMenu}
           >
             <span className="sr-only">Open main menu</span>
-            {mobileMenuOpen ? (
+            {isMobileMenuOpen ? (
               <svg
                 className="h-6 w-6"
                 fill="none"
@@ -92,7 +94,7 @@ export default function Navbar() {
                 {session.user?.name}
               </span>
               <button
-                onClick={() => signOut()}
+                onClick={signOut}
                 className="text-sm font-semibold text-gray-900 hover:text-gray-600"
               >
                 Sign out
@@ -100,17 +102,11 @@ export default function Navbar() {
             </div>
           ) : (
             <div className="flex items-center gap-x-4">
-              <button
-                onClick={() => signIn()}
-                className="text-sm font-semibold text-gray-900 hover:text-gray-600"
-              >
-                Sign in
-              </button>
               <Link
-                href="/auth/signup"
+                href="/signin"
                 className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500"
               >
-                Sign up
+                Sign in
               </Link>
             </div>
           )}
@@ -118,7 +114,7 @@ export default function Navbar() {
       </nav>
 
       {/* Mobile menu */}
-      {mobileMenuOpen && (
+      {isMobileMenuOpen && (
         <div className="lg:hidden">
           <div className="space-y-1 px-4 pb-3 pt-2">
             <Link
@@ -128,7 +124,7 @@ export default function Navbar() {
                   ? "bg-blue-50 text-blue-600"
                   : "text-gray-900 hover:bg-gray-50"
               }`}
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={toggleMobileMenu}
             >
               Dashboard
             </Link>
@@ -151,7 +147,7 @@ export default function Navbar() {
                   </span>
                 </div>
                 <button
-                  onClick={() => signOut()}
+                  onClick={signOut}
                   className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                 >
                   Sign out
@@ -165,13 +161,6 @@ export default function Navbar() {
                 >
                   Sign in
                 </button>
-                <Link
-                  href="/auth/signup"
-                  className="-mx-3 block rounded-lg bg-blue-600 px-3 py-2.5 text-base font-semibold leading-7 text-white hover:bg-blue-500"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Sign up
-                </Link>
               </div>
             )}
           </div>

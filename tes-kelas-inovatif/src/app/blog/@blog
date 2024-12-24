@@ -1,0 +1,30 @@
+import { returnValidationErrors } from "next-safe-action";
+import { actionClient } from "@/lib/safe-action";
+import { postSchema } from "./validation";
+import { revalidatePath } from "next/cache";
+
+export const createBlogPostAction = actionClient
+  .schema(postSchema)
+  .action(async ({ parsedInput }) => {
+    const { title, content } = parsedInput;
+    const isPostValid = title && content;
+
+    if (!isPostValid) {
+      return returnValidationErrors(postSchema, {
+        _errors: ["Data postingan tidak valid"],
+      });
+    }
+
+    const newPost = {
+      title,
+      content,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    revalidatePath("/dashboard/posts-list");
+    return {
+      message: "Postingan berhasil dibuat",
+      post: newPost,
+    };
+  });

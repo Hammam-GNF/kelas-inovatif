@@ -1,0 +1,122 @@
+actions.ts
+"use server";
+
+import { returnValidationErrors } from "next-safe-action";
+import { actionClient } from "@/lib/safe-action";
+import { prisma } from "@/lib/prisma";
+import { CreateCourseSchema } from "./course-schemas";
+import { revalidatePath } from "next/cache";
+
+export const addCourseAction = actionClient
+	.schema(CreateCourseSchema)
+	.action(async ({ parsedInput }) => {
+		const newCourse = await prisma.course.create({
+			data: {
+				course: parsedInput.course,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			},
+		});
+
+		if (!newCourse?.id) {
+			return returnValidationErrors(CreateCourseSchema, {
+				_errors: ["Invalid course data"],
+			});
+		}
+		revalidatePath("/panel/course/listing");
+		return {
+			message: "Course created successfully",
+			course: newCourse,
+		};
+	});
+  
+  
+  
+######## form.tsx
+
+"use client";
+import { Button } from "@/components/ui/button";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
+import { toast } from "sonner";
+import { addCourseAction } from "./course-actions";
+import { CreateCourseSchema } from "./course-schemas";
+import {
+	Card,
+	CardHeader,
+	CardTitle,
+	CardDescription,
+	CardContent,
+} from "@/components/ui/card";
+
+export function AddCourseForm() {
+	const { form, handleSubmitWithAction, resetFormAndAction } =
+		useHookFormAction(addCourseAction, zodResolver(CreateCourseSchema), {
+			actionProps: {
+				onSuccess: ({ data }) => {
+					toast.success(data?.message);
+				},
+				onError: ({ error }) => {
+					toast.error(error?.serverError);
+				},
+			},
+			formProps: {
+				defaultValues: {
+					course: "",
+				},
+			},
+			errorMapProps: {
+				joinBy: " and ",
+			},
+		});
+
+	return (
+		<Card className="max-w-md w-full mx-auto">
+			<CardHeader>
+				<CardTitle>Add Course</CardTitle>
+				<CardDescription>Enter the details of the new course.</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<Form {...form}>
+					<form onSubmit={handleSubmitWithAction} className="space-y-8">
+						<FormField
+							control={form.control}
+							name="course"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Course</FormLabel>
+									<FormControl>
+										<Input placeholder="Enter course name" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<Button type="submit" disabled={form.formState.isSubmitting}>
+							{form.formState.isSubmitting ? "Loading..." : "Add Course"}
+						</Button>
+					</form>
+				</Form>
+			</CardContent>
+		</Card>
+	);
+}
+
+
+##########
+import { z } from "zod";
+
+export const CreateCourseSchema = z.object({
+	course: z.string().min(1, { message: "Course is required" }),
+});
+
+export type CreateCourse = z.infer<typeof CreateCourseSchema>;

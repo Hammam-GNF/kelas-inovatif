@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Home - Gonjil St",
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      Hello World
+      <h1 className="text-2xl font-bold">Hello World</h1>
     </main>
   );
 }
