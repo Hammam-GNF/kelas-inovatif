@@ -17,6 +17,7 @@
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/supabase-js": "^2.47.10",
     "@types/next-auth": "^3.13.0",
+    "@upstash/ratelimit": "^2.0.5",
     "ai": "^4.0.22",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
