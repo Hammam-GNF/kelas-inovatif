@@ -1,7 +1,6 @@
 "use client";
 
 import { useChat } from "ai/react";
-import { Input } from "@/components/ui/input";
 
 export default function Chat() {
   const { messages, input, handleInputChange, handleSubmit } = useChat();
@@ -21,11 +20,11 @@ export default function Chat() {
         onSubmit={handleSubmit}
         className="fixed bottom-0 w-full max-w-md mb-8"
       >
-        <Input
+        <input
           value={input}
           placeholder="Say something..."
           onChange={handleInputChange}
-          className="border border-gray-300 rounded shadow-xl"
+          className="w-full p-2 border border-gray-300 rounded shadow-xl" 
         />
       </form>
     </div>
