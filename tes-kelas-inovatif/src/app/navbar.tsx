@@ -1,18 +1,32 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signIn, useSession } from "next-auth/react";
-import { useAuth } from "@/providers/AuthProvider";
-import Image from "next/image";
+import { createServerClient } from "@/lib/auth";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { data: session, status } = useSession();
-  const { signOut } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<{ email: string | undefined } | null>(null);
 
   const toggleMobileMenu = () => setIsMobileMenuOpen((prev) => !prev);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const supabase = createServerClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user ? { email: user.email } : null);
+    };
+
+    fetchUser();
+  }, []);
+
+  const signOut = async () => {
+    const supabase = createServerClient();
+    await supabase.auth.signOut();
+    setUser(null);
+  };
 
   return (
     <header className="bg-white">
@@ -79,19 +93,10 @@ export default function Navbar() {
 
         {/* Auth buttons */}
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4">
-          {status === "authenticated" ? (
+          {user ? (
             <div className="flex items-center gap-x-4">
-              {session?.user?.image && (
-                <Image
-                  src={session.user.image}
-                  alt={session.user.name || ""}
-                  width={32}
-                  height={32}
-                  className="rounded-full"
-                />
-              )}
               <span className="text-sm font-semibold text-gray-900">
-                {session.user?.name}
+                {user.email}
               </span>
               <button
                 onClick={signOut}
@@ -128,20 +133,11 @@ export default function Navbar() {
             </Link>
           </div>
           <div className="border-t border-gray-200 px-4 py-6">
-            {status === "authenticated" ? (
+            {user ? (
               <div className="space-y-3">
                 <div className="flex items-center gap-x-3">
-                  {session?.user?.image && (
-                    <Image
-                      src={session.user.image}
-                      alt={session.user.name || ""}
-                      width={32}
-                      height={32}
-                      className="rounded-full"
-                    />
-                  )}
                   <span className="text-sm font-semibold text-gray-900">
-                    {session.user?.name}
+                    {user.email}
                   </span>
                 </div>
                 <button
@@ -152,12 +148,13 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <button
-                onClick={() => signIn()}
+              <Link
+                href="/signin"
                 className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                onClick={toggleMobileMenu}
               >
                 Sign in
-              </button>
+              </Link>
             )}
           </div>
         </div>

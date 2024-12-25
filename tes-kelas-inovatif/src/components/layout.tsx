@@ -7,9 +7,9 @@ interface LayoutProps {
 }
 
 export default function Layout({ children, showNavbar = true }: LayoutProps) {
-  const { loading } = useAuth();
+  const { isLoading } = useAuth();
 
-  return loading ? (
+  return isLoading ? (
     <div className="flex justify-center items-center h-screen">
       <p className="text-2xl font-bold">Loading...</p>
     </div>

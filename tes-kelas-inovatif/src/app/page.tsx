@@ -19,10 +19,10 @@ export default function Home() {
       <h1 className="text-2xl font-bold">Hello World</h1>
       <div className="flex items-center justify-center">
         <Link
-          href="/signin"
-          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+          href="/login"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200"
         >
-          Sign In
+          Login
         </Link>
       </div>
     </main>
