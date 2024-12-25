@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/auth";
 import { DashboardNav } from "@/components/dashboard-nav";
 
-export default async function DashboardLayout({
+export default async function Page({
   children,
 }: {
   children: React.ReactNode;

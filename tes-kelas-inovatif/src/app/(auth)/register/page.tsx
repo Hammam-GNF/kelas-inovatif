@@ -4,12 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
-import { supabase } from "@/lib/supabase";
+import { registerUser } from "./server-action";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
+    fullname: "",
     email: "",
     password: "",
   });
@@ -19,20 +20,18 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email.trim(),
-        password: formData.password.trim(),
-      });
+      const result = await registerUser(formData);
 
-      if (error) throw error;
-
-      if (data?.user) {
-        toast.success("Login berhasil!");
-        router.push("/dashboard");
+      if (!result.success) {
+        toast.error(result.error || "Registration failed");
+        return;
       }
+
+      toast.success(result.message || "Registration successful!");
+      router.push("/login");
     } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Email atau password salah");
+      console.error("Registration error:", error);
+      toast.error("Failed to register. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -43,10 +42,30 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="bg-white px-8 py-12 shadow-xl rounded-lg">
           <h2 className="text-center text-3xl font-bold tracking-tight text-gray-900">
-            Login to your account
+            Create an account
           </h2>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+            <div>
+              <label
+                htmlFor="fullname"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Full Name
+              </label>
+              <input
+                id="fullname"
+                type="text"
+                required
+                value={formData.fullname}
+                onChange={(e) =>
+                  setFormData({ ...formData, fullname: e.target.value })
+                }
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                placeholder="John Doe"
+              />
+            </div>
+
             <div>
               <label
                 htmlFor="email"
@@ -84,25 +103,24 @@ export default function LoginPage() {
                 }
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
                 placeholder="••••••••"
+                minLength={6}
               />
             </div>
 
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? "Loading..." : "Login"}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? "Creating account..." : "Create account"}
+            </button>
 
             <div className="text-sm text-center">
               <Link
-                href="/register"
+                href="/login"
                 className="font-medium text-blue-600 hover:text-blue-500"
               >
-                Don't have an account? Sign up
+                Already have an account? Sign in
               </Link>
             </div>
           </form>
